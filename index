@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Click the Circle</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: sans-serif;
+      background: #f0f0f0;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      text-align: center;
+    }
+    #circle {
+      position: absolute;
+      width: 80px;
+      height: 80px;
+      background-color: #3498db;
+      border-radius: 50%;
+      cursor: pointer;
+      display: none;
+    }
+    #score, #timer, #highscore {
+      font-size: 1.8rem;
+      margin: 5px;
+    }
+    #startBtn {
+      padding: 12px 25px;
+      font-size: 1rem;
+      background-color: #2ecc71;
+      color: white;
+      border: none;
+      border-radius: 12px;
+      cursor: pointer;
+      margin-top: 20px;
+    }
+    @media (max-width: 600px) {
+      #circle {
+        width: 60px;
+        height: 60px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div id="score">Score: 0</div>
+  <div id="highscore">Highscore: 0</div>
+  <div id="timer">Time left: 30</div>
+  <button id="startBtn">Start Game</button>
+  <div id="circle"></div>
+  <audio id="clickSound" src="https://www.soundjay.com/buttons/sounds/button-09.mp3" preload="auto"></audio>
+
+  <script>
+    const circle = document.getElementById('circle');
+    const scoreEl = document.getElementById('score');
+    const timerEl = document.getElementById('timer');
+    const highscoreEl = document.getElementById('highscore');
+    const startBtn = document.getElementById('startBtn');
+    const clickSound = document.getElementById('clickSound');
+
+    let score = 0;
+    let timeLeft = 30;
+    let gameInterval;
+    let highscore = localStorage.getItem('highscore') || 0;
+    highscoreEl.textContent = `Highscore: ${highscore}`;
+
+    function randomPosition() {
+      const circleSize = circle.offsetWidth;
+      const x = Math.random() * (window.innerWidth - circleSize);
+      const y = Math.random() * (window.innerHeight - circleSize);
+      circle.style.left = `${x}px`;
+      circle.style.top = `${y}px`;
+    }
+
+    function startGame() {
+      score = 0;
+      timeLeft = 30;
+      scoreEl.textContent = "Score: 0";
+      timerEl.textContent = "Time left: 30";
+      startBtn.style.display = 'none';
+      circle.style.display = 'block';
+      randomPosition();
+
+      gameInterval = setInterval(() => {
+        timeLeft--;
+        timerEl.textContent = `Time left: ${timeLeft}`;
+        randomPosition();
+        if (timeLeft <= 0) {
+          clearInterval(gameInterval);
+          circle.style.display = 'none';
+          startBtn.style.display = 'block';
+          if (score > highscore) {
+            highscore = score;
+            localStorage.setItem('highscore', score);
+            highscoreEl.textContent = `Highscore: ${score}`;
+            alert(`🎉 Ny highscore: ${score}!`);
+          } else {
+            alert(`Game Over! Din score: ${score}`);
+          }
+        }
+      }, 1000);
+    }
+
+    circle.addEventListener('click', () => {
+      score++;
+      scoreEl.textContent = `Score: ${score}`;
+      randomPosition();
+      clickSound.currentTime = 0;
+      clickSound.play();
+    });
+
+    startBtn.addEventListener('click', startGame);
+  </script>
+</body>
+</html>
